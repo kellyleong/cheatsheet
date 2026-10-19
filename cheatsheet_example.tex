@@ -1,0 +1,298 @@
+\documentclass{article}
+
+% --- GEOMETRY & PAGE LAYOUT ---
+% Set landscape mode with very small margins to maximize space
+\usepackage[a4paper, landscape, top=0.75cm, bottom=0.75cm, left=0.75cm, right=0.75cm]{geometry}
+
+% --- FONT & LANGUAGE (BABEL) ---
+% Use fontspec for modern font handling (requires XeLaTeX/LuaLaTeX)
+\usepackage{iftex}
+% Use Unicode font features only for XeTeX or LuaTeX; fall back to pdfLaTeX safe fonts otherwise
+\ifPDFTeX
+  % Fallback for pdfLaTeX (no fontspec)
+  \usepackage[T1]{fontenc}
+  \usepackage[english]{babel}
+  \usepackage{lmodern}
+\else
+  \usepackage{fontspec}
+  % Simplified babel for English (removes the bidi=basic error)
+  \usepackage[english]{babel}
+  % Prefer Noto Sans if available, otherwise fallback to Latin Modern or system fonts
+  \IfFontExistsTF{Noto Sans}{\setsansfont{Noto Sans}}{%
+    \IfFontExistsTF{Latin Modern Sans}{\setsansfont{Latin Modern Sans}}{\setsansfont{Arial}}%
+  }
+  \IfFontExistsTF{Noto Sans Mono}{\setmonofont{Noto Sans Mono}}{%
+    \IfFontExistsTF{Latin Modern Mono}{\setmonofont{Latin Modern Mono}}{\setmonofont{Courier New}}%
+  }
+\fi
+% Use sans-serif as the default family for compact layout
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- PACKAGES ---
+\usepackage{multicol}      
+\usepackage{amsmath}       
+\usepackage{amssymb}       
+\usepackage{booktabs}      
+\usepackage{parskip}       
+\setlength{\parskip}{1pt}  
+\setlength{\parindent}{0pt} 
+\usepackage[dvipsnames]{xcolor} 
+\usepackage{enumitem}
+
+% --- CUSTOM COMMANDS FOR COMPACT LAYOUT ---
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+
+% Styled commands mapped to compact layout
+\newcommand{\hlhighlight}[1]{\par\vspace{1.5pt}\noindent\colorbox{yellow!50}{\parbox{\dimexpr\columnwidth-2\fboxsep\relax}{\textbf{#1}}}\par\vspace{0.5pt}}
+\newcommand{\sectitle}[1]{\par\textbf{\color{blue!70!black}{#1}}\par}
+\newcommand{\concept}[1]{\textcolor{teal}{\textbf{#1}}}
+\newcommand{\procname}[1]{\textcolor{purple}{\textbf{#1}}}
+\newcommand{\category}[1]{\textcolor{green!60!black}{\textbf{#1}}}
+\newcommand{\lbl}[1]{\textcolor{green!60!black}{\textbf{#1}}}
+\newcommand{\lblnb}[1]{\textcolor{green!60!black}{#1}}
+
+\setlist{nosep, leftmargin=1em, label=\textbullet}
+
+\begin{document}
+% Remove all page numbering, headers, and footers
+\pagestyle{empty}
+
+% Shrink font and adjust line spacing
+\fontsize{4.5pt}{4.5pt}\selectfont
+
+% Tighter column gap
+\setlength{\columnsep}{5pt}
+
+% Begin the 7-column layout
+\begin{multicols}{7}
+
+% ==========================================
+% HW1: Linear Regression & Optimization
+% ==========================================
+\hlhighlight{1. Linear Algebra \& Calculus}
+\sectitle{Vectors \& Matrices}
+\begin{itemize}
+    \item \concept{Inner Product:} $\theta^\top x = \sum_{k=1}^d \theta^{(k)} x^{(k)}$ (Scalar). \concept{Transpose:} $(AB)^\top = B^\top A^\top$. \concept{Symmetric Matrix:} $A^\top = A$. \concept{Euclidean Norm Squared:} $\|v\|_2^2 = v^\top v$. \concept{Cauchy-Schwarz Inequality:} $(\sum x_i^2)(\sum y_i^2) \geq (\sum x_i y_i)^2$.
+    \item \concept{Quadratic Exp:} $(x+y)^\top A (x+y) = x^\top Ax + 2x^\top Ay + y^\top Ay$ (if $A$ is symmetric).
+\end{itemize}
+\sectitle{Matrix Calculus Rules}
+\begin{itemize}
+    \item For a vector $\theta$ and symmetric matrix $A$: \lbl{Constant:} $\nabla_\theta (c) = 0$. \lbl{Linear:} $\nabla_\theta (b^\top \theta) = b$. \lbl{Quadratic:} $\nabla_\theta (\theta^\top A \theta) = 2A\theta$.
+\end{itemize}
+
+\hlhighlight{2. Optimization \& Convexity}
+\sectitle{Convexity Definitions}
+\begin{itemize}
+    \item \concept{Convex Function:} The line connecting two points on the curve lies above the curve. \lbl{Sums:} The sum of convex functions is convex. \lbl{1D test:} Second derivative $f''(\theta) \geq 0$. \lbl{Multi-D test:} Hessian matrix is \concept{Positive Semi-Definite (PSD)}. (Eigenvalues $\geq 0$).
+\end{itemize}
+\sectitle{First-Order Optimality Condition}
+\begin{itemize}
+    \item For an unconstrained convex optimization problem, the global minimum is found where the gradient is zero: $\nabla \ell(\hat{\theta}) = 0$.
+\end{itemize}
+
+\hlhighlight{3. Univariate Regression (1D)}
+\sectitle{Without Intercept \& With Intercept}
+\begin{itemize}
+    \item Given $N$ pairs of $(\hat{x}_i, \hat{y}_i)$. \concept{Case 1: Without Intercept:} \lbl{Model:} $\hat{y} = \theta \hat{x}_i$. \lbl{Loss Function (Sum of Sq. Errors):} $\ell(\theta) = \sum_{i=1}^N (\theta\hat{x}_i - \hat{y}_i)^2$. \lbl{Optimal Slope:} $\hat{\theta} = \frac{\sum_{i=1}^N \hat{x}_i \hat{y}_i}{\sum_{i=1}^N \hat{x}_i^2}$.
+    \item \concept{Case 2: With Intercept:} \lbl{Model:} $\hat{y} = \theta_0 + \theta \hat{x}_i$. \lbl{Loss Function:} $\ell(\theta_0, \theta) = \sum_{i=1}^N (\theta_0 + \theta\hat{x}_i - \hat{y}_i)^2$. \lbl{Averages \& Sample Cov/Var:} $\bar{x} = \frac{1}{N}\sum \hat{x}_i, \quad \bar{y} = \frac{1}{N}\sum \hat{y}_i$, $S_{xx} = \frac{1}{N}\sum (\hat{x}_i - \bar{x})^2$, $S_{xy} = \frac{1}{N}\sum (\hat{x}_i - \bar{x})(\hat{y}_i - \bar{y})$. \lbl{Optimal Parameters:} $\hat{\theta} = \frac{S_{xy}}{S_{xx}} = \frac{\sum (\hat{x}_i - \bar{x})(\hat{y}_i - \bar{y})}{\sum (\hat{x}_i - \bar{x})^2}$, $\hat{\theta}_0 = \bar{y} - \hat{\theta}\bar{x}$.
+    \item \concept{2-Point Fit Trick:} If given only 2 points, Slope $\hat{\theta} = \frac{\Delta y}{\Delta x}$, Intercept $\theta_0 = y - \hat{\theta}x$ (plug in either point).
+\end{itemize}
+
+\hlhighlight{4. Multivariate Regression}
+\sectitle{Vectorized Form \& Solutions}
+\begin{itemize}
+    \item For $d$-dimensional features, we vectorize the data. $X \in \mathbb{R}^{N \times d}$ (Data Matrix), $Y \in \mathbb{R}^{N \times 1}$ (Response Vector), $\theta \in \mathbb{R}^{d \times 1}$ (Parameter Vector).
+    \item \lbl{Loss Function Expansion:} $\ell(\theta) = \|X\theta - Y\|_2^2 = (X\theta - Y)^\top (X\theta - Y) = \theta^\top X^\top X \theta - 2Y^\top X \theta + Y^\top Y$.
+    \item \lbl{Gradient:} $\nabla \ell(\theta) = 2X^\top X \theta - 2X^\top Y$. \lbl{First Order Condition:} $X^\top X \hat{\theta} = X^\top Y$. \lbl{Analytical Solution (Normal Equation):} $\hat{\theta} = (X^\top X)^{-1} X^\top Y$.
+    \item \lbl{Augmentation Trick (To add intercept):} Add a column of $1$'s to $X$ (making it $N \times (d+1)$), and prepend $\theta_0$ to $\theta$. The Normal Equation remains exactly the same.
+\end{itemize}
+
+\hlhighlight{5. Key Regression Properties}
+\sectitle{Core Concepts}
+\begin{itemize}
+    \item \concept{Invertibility \& Small-Sample Problem:} $\hat{\theta}$ requires inverting the \concept{Gram Matrix} $X^\top X$. $X^\top X$ is invertible \textit{iff} $X$ has \lbl{full column rank}. \concept{Small-Sample Problem:} If $N < d$ (fewer observations than features), $X^\top X$ is NOT invertible. The problem is ill-posed and has an infinite number of optimal solutions.
+    \item \concept{Orthogonality Condition:} Let $E = Y - X\hat{\theta}$ be the vector of errors. $X^\top E = 0$. The vector of errors is orthogonal to the column span of the feature matrix $X$.
+    \item \concept{Maximum Likelihood Estimation (MLE):} If we assume errors are independent and follow a Normal Distribution $\mathcal{N}(0, \sigma^2)$: Maximizing the probability (Likelihood) of the data is mathematically equivalent to minimizing the \concept{sum of squared errors}. \lbl{Takeaway:} OLS estimator = MLE estimator under Gaussian noise.
+\end{itemize}
+
+\hlhighlight{6. Homework 1 Variants}
+\sectitle{Transformations \& Comparisons}
+\begin{itemize}
+    \item \concept{Scaling / Unit Conversion:} If data is scaled: $\tilde{x} = c_1 x$ and $\tilde{y} = c_2 y$. $\tilde{\theta} = \frac{c_2}{c_1} \hat{\theta}$.
+    \item \concept{Swapping Covariate \& Response:} If you mistakenly swap $X$ and $Y$, the new slope $\hat{\theta}_{\text{swap}} \neq 1 / \hat{\theta}$. By Cauchy-Schwarz: $\hat{\theta} \times \hat{\theta}_{\text{swap}} \leq 1$.
+    \item \concept{Duplicating Data:} If the entire dataset is duplicated (stacking $X$ on $X$): $\tilde{X}^\top \tilde{X} = 2 X^\top X, \quad \tilde{X}^\top \tilde{Y} = 2 X^\top Y$. The constant cancels out during inversion. \lbl{The optimal slope $\hat{\theta}$ does not change.}
+    \item \concept{Weighted Linear Regression:} Each observation has a predetermined weight $w_i \geq 0$. $\min_{\theta} \sum_{i=1}^N w_i(\theta\hat{x}_i - \hat{y}_i)^2$. \lbl{Derivative:} $\sum 2w_i(\theta\hat{x}_i - \hat{y}_i)\hat{x}_i$. \lbl{Optimal Slope (no intercept):} $\hat{\theta} = \frac{\sum w_i \hat{x}_i \hat{y}_i}{\sum w_i \hat{x}_i^2}$.
+    \item \concept{Robustness (OLS vs. LAD):} \concept{OLS (Ordinary Least Squares):} Minimizes $(kx_i - y_i)^2$. Heavily influenced by \lbl{outliers} because errors are squared. \concept{LAD (Least Absolute Deviations):} Minimizes $|kx_i - y_i|$. The optimal $k$ is the \lbl{median} of the ratios $\{y_i / x_i\}$. It is highly \lbl{robust} to extreme outliers because it penalizes errors linearly.
+    \item \concept{Pipeline Rules:} Outliers $\implies$ use LAD. Too many features $\implies$ use LASSO.
+    \item \concept{Correlation vs. Regression:} \concept{Correlation ($r$):} Measures the \textit{strength} and \textit{direction} of the linear relationship (strictly between -1 and 1). \concept{Regression ($\theta$):} Measures the \textit{expected change} in $Y$ for a 1-unit change in $X$ ($\Delta y = \theta \Delta x$).
+\end{itemize}
+
+% ==========================================
+% HW2: Regularization & Model Selection
+% ==========================================
+\hlhighlight{7. Fundamentals \& Linear Models}
+\sectitle{Predictors \& Engineering}
+\begin{itemize}
+    \item \concept{The Linear Predictor:} $f(x) = \sum_{k=1}^d \hat{\theta}^{(k)} x^{(k)} = \hat{\theta}^\top x$. $x \in \R^d$: Covariate (input features). $\hat{\theta} \in \R^d$: Parameters (weights). \concept{Ordinary Least Squares (OLS) Magic Formula:} $\hat{\theta} = (X^\top X)^{-1}X^\top Y$.
+    \item \concept{Mean Squared Error (MSE):} Measures fit to historical data (In-Sample Error). $\text{MSE} = \frac{1}{N} \sum_{i=1}^N \hat{e}_i^2$ where $\hat{e}_i = \hat{y}_i - \hat{\theta}^\top \hat{x}_i$.
+    \item \concept{Feature Engineering:} Using feature maps ($\Phi$) to fit nonlinear curves using linear math. $\Phi(x_i) = \hat{x}_i = [\phi^{(1)}(x_i), \phi^{(2)}(x_i), \dots, \phi^{(d)}(x_i)]^\top$. e.g., Polynomial features: $\phi^{(k)}(x) = x^k$. Creates high-dimensional feature vectors from 1D inputs.
+\end{itemize}
+
+\hlhighlight{8. Bias-Variance Trade-Off}
+\sectitle{Model Complexity}
+\begin{itemize}
+    \item Expected Prediction Error on unseen data: $\text{Error} = \text{Bias}^2 + \text{Variance} + \text{Noise Var.}$
+    \item \category{Underfitting (High Bias):} Model too simple (e.g., degree 1 polynomial). Fails on both train and test data. \lbl{Fix:} Make model complex (more features), run optimization longer, decrease regularization.
+    \item \category{Overfitting (High Variance):} Model too complex (e.g., degree 15 polynomial). Memorizes noise. Low train error, high test error. \lbl{Fix:} Make simpler (fewer features), get more data, stop optimization early, \lbl{Increase Regularization}.
+\end{itemize}
+
+\hlhighlight{9. Regularization \& Norms}
+\sectitle{Shrinkage \& Penalties}
+\begin{itemize}
+    \item \concept{Occam's Razor:} Simpler models are preferred. We combat overfitting via \concept{Shrinkage} (restricting the magnitude of parameters $\theta$ to ignore noise).
+    \item \concept{Mathematical Norms ($\norm{v}_p$):} For a vector $v$ of length $d$: \lbl{0-norm ($L_0$):} Counts non-zero elements. $\norm{v}_0 \leq 1$ means max 1 non-zero item (shape: Cross/Axes). \lbl{1-norm ($L_1$):} Sum of absolute values. $\sum |v_i|$ (shape: Diamond). \lbl{2-norm ($L_2$):} Euclidean distance. $\sqrt{v^\top v}$ (shape: Circle). \lbl{$\infty$-norm ($L_\infty$):} Max absolute value. $\max |v_i|$ (shape: Square).
+    \item \concept{Ridge Regression ($L_2$ Regularization):} $\min_{\theta \in \R^d} \norm{X\theta - Y}_2^2 + \alpha \norm{\theta}_2^2$. $\alpha$: Trade-off parameter. If $\alpha=0 \implies$ OLS. If $\alpha \to \infty \implies \hat{\theta} \to 0$ (uninformative). \lbl{Rule:} Do NOT regularize the intercept ($\theta_0$). It only shifts the baseline. \lbl{Closed-form solution:} $\hat{\theta}_{\text{ridge}} = (X^\top X + \alpha I)^{-1} X^\top Y$. \lbl{Invertibility:} $X^\top X + \alpha I$ is always invertible if $\alpha > 0$.
+    \item \lbl{Prior Penalty (Macau Problem):} Shrink to prior $v$ instead of 0. $\min \|X\theta - Y\|_2^2 + \lambda \|\theta - v\|_2^2 \implies \hat{\theta} = (X^\top X + \lambda I)^{-1}(X^\top Y + \lambda v)$.
+    \item \concept{LASSO Regression ($L_1$ Regularization):} $\min_{\theta \in \R^d} \norm{X\theta - Y}_2^2 + \alpha \norm{\theta}_1$. \lbl{Key property:} Induces \concept{sparsity} (forces many $\theta^{(k)} = 0$). Acts as automatic feature selector. \lbl{Why?} The elliptical error contour hits the sharp corners of the $L_1$ diamond constraint first, where coordinates are zero.
+\end{itemize}
+
+\hlhighlight{10. Model Selection}
+\sectitle{Testing \& Validation}
+\begin{itemize}
+    \item \lbl{Core Rule:} Training error is too optimistic. Must test on unseen data.
+    \item \concept{Cross-Validation (CV):} \lbl{K-Fold CV:} Split data into $K$ non-overlapping folds. Train on $K-1$ folds, test on $1$ fold. Cycle $K$ times. Aggregate expected MSE and std dev. \lbl{Leave-One-Out CV (LOOCV):} $K=N$. Train on $N-1$, test on 1. Good for small data, but high computational burden. Compare models using the exact same data splits. Pick model with lowest Expected MSE. Standard practice: $K=5$.
+    \item \concept{Data Leakage:} Happens when training and test sets are correlated (e.g., same patient in both sets, time-series overlaps). Results in falsely optimistic error estimates. Always split by subject/time properly.
+\end{itemize}
+
+\hlhighlight{11. HW02 Matrix Calculus \& Derivations}
+\sectitle{Advanced Mechanics}
+\begin{itemize}
+    \item \concept{Vectorization Tricks:} \lblnb{Sum of products:} $\sum \hat{x}_i \hat{y}_i = X^\top Y$. \lblnb{Mean centered inner product:} $\sum(\hat{x}_i - \bar{x})(\hat{y}_i - \bar{y}) = (X - \bar{x}\mathbf{e})^\top (Y - \bar{y}\mathbf{e})$. \lblnb{Regularized sum:} $\sum \hat{x}_i \hat{y}_i + \alpha \sum \hat{x}_i^2 = X^\top Y + \alpha X^\top X$. \lblnb{Absolute loss sum:} $\sum | \theta \hat{x}_i - \hat{y}_i | = \norm{X\theta - Y}_1$.
+    \item \concept{Generalized Tikhonov Regularization:} Objective: $\min \ell(\theta) = \norm{X\theta - Y}_2^2 + \norm{\Gamma\theta}_2^2$. \procname{1. Expand data term:} $\norm{X\theta - Y}_2^2 = (X\theta - Y)^\top (X\theta - Y) = \theta^\top X^\top X \theta - 2X^\top Y \theta + Y^\top Y$. \procname{2. Expand penalty:} $\norm{\Gamma\theta}_2^2 = (\Gamma\theta)^\top(\Gamma\theta) = \theta^\top \Gamma^\top \Gamma \theta$. \procname{3. Quadratic Form ($\theta^\top A \theta + b^\top \theta + c$):} $A = X^\top X + \Gamma^\top \Gamma$, $b = -2X^\top Y$, $c = Y^\top Y$. \procname{4. Convexity (Hessian):} $\nabla^2_\theta \ell(\theta) = 2A = 2(X^\top X + \Gamma^\top \Gamma)$. Since $M^\top M$ is always Positive Semi-Definite (PSD), the sum is PSD. Yes, it's convex. \procname{5. Gradient $\to 0$ for optimal $\hat{\theta}$:} $2(X^\top X + \Gamma^\top \Gamma)\theta - 2X^\top Y = 0 \implies \hat{\theta} = (X^\top X + \Gamma^\top \Gamma)^{-1}X^\top Y$. \procname{6. Recovery:} If $\Gamma = \sqrt{\lambda}I$, then $\Gamma^\top \Gamma = \lambda I$. Substituting gives standard Ridge formula.
+    \item \concept{Reweighting (WLS):} Linear prediction: $y_{pred} = x_{new}^\top \hat{\theta}$. For Weighted Least Squares, $\hat{\theta}_{WLS} = (X^\top S X)^{-1}X^\top S Y$. \lbl{Inverse Var:} If noise $\sim \mathcal{N}(0, \sigma^2)$, optimal weights are $w_i = 1/\sigma^2$. $y_{pred} = x_{new}^\top (X^\top S X)^{-1}X^\top S Y$. By grouping $Y$, the weighting function $w$ is: $w(X, S, x_{new}, i) = [x_{new}^\top(X^\top S X)^{-1}X^\top S]_i$.
+    \item \concept{Laplace Distribution $\to$ Absolute Error:} Noise mechanism: $\hat{\epsilon}_i \sim \text{Laplace}(0,1)$. Likelihood given by $L = \frac{1}{2}\exp(-|y_i - \theta x_i|)$. \procname{1. Full Likelihood:} $\prod_{i=1}^N \frac{1}{2}\exp(-|y_i - \theta x_i|)$. \procname{2. Log-Likelihood:} $\log(\prod) \to \sum$. $\log(L) = -N\log(2) - \sum |y_i - \theta x_i|$. \procname{3. Optimization Equivalence:} Maximizing a negative sum is mathematically identical to \lbl{minimizing} a positive sum. $\max (-\sum |y_i - \theta x_i|) \iff \min \sum |y_i - \theta x_i|$. \lbl{Conclusion:} Assuming Laplace noise justifies $L_1$ absolute loss (LASSO).
+    \item \concept{Chinchilla Scaling (Linearizing Non-Linearity):} Model: $\hat{y}_i = E + A \hat{x}_i^{-\alpha} + B \hat{d}_i^{-\beta} + \epsilon_i$. If $\alpha, \beta$ are fixed via Grid Search, treat $\hat{x}_i^{-\alpha}$ and $\hat{d}_i^{-\beta}$ as standard linear features! Matrix format ($Y = X\theta + \epsilon$): $X = \begin{bmatrix} 1 & \hat{x}_1^{-\alpha} & \hat{d}_1^{-\beta} \\ \vdots & \vdots & \vdots \\ 1 & \hat{x}_N^{-\alpha} & \hat{d}_N^{-\beta} \end{bmatrix}, \quad \theta = \begin{bmatrix} E \\ A \\ B \end{bmatrix}$. Calculate predicted loss to compare budget constraints.
+\end{itemize}
+
+% ==========================================
+% HW3: Classification, LogReg & LDA/QDA
+% ==========================================
+\hlhighlight{12. Logistic Regression Fundamentals}
+\sectitle{Classification Models}
+\begin{itemize}
+    \item Used for predicting categorical/discrete labels (e.g., $y \in \{0, 1\}$).
+    \item \concept{The Sigmoid (Logistic) Function:} Maps any real number to a probability between 0 and 1. $\sigma(z) = \frac{1}{1 + e^{-z}}$. \lbl{Key Mathematical Properties (from HW):} \concept{Derivative:} $\sigma'(z) = \sigma(z)(1 - \sigma(z))$. \concept{Symmetry:} $\sigma(-z) = 1 - \sigma(z)$.
+    \item \concept{Hypothesis Formulation:} Model probability of the positive class ($Y=1$) as: $P(Y=1 | X=x) = \sigma(\theta^\top x) = \frac{1}{1 + e^{-\theta^\top x}}$.
+    \item \concept{Log-Odds (Logit):} Odds is the ratio of probability of success to failure. $\text{Odds} = \frac{P(Y=1|X)}{P(Y=0|X)} = \frac{\sigma(\theta^\top x)}{1-\sigma(\theta^\top x)}$. Taking the logarithm yields a linear equation: $\log(\text{Odds}) = \theta^\top x = \theta_0 + \theta_1 x_1 + \dots$ \lbl{Boundary:} At threshold $\tau=0.5$, boundary is exactly where $\theta^\top x = 0$.
+    \item \concept{LLM Reward Model (Bradley-Terry):} Predict text A beats B via probability $\sigma(\theta^\top z_A - \theta^\top z_B)$. Treat $x_{new} = (z_A - z_B)$ as the new feature, then minimize standard Log-Loss.
+\end{itemize}
+
+\hlhighlight{13. Maximum Likelihood Estimation (MLE)}
+\sectitle{Objective Functions}
+\begin{itemize}
+    \item We find $\theta$ by maximizing the likelihood of the observed data (or minimizing the negative log-likelihood).
+    \item \concept{Standard Labels $y \in \{0, 1\}$:} \lbl{Log-Likelihood Objective:} $\max_\theta \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i) \right]$. \lbl{Minimization Form (Cross-Entropy Loss):} $\min_\theta \sum_{i=1}^{N} \left[ -y_i \theta^\top x_i + \log(1 + e^{\theta^\top x_i}) \right]$.
+    \item \concept{Modified Labels $y \in \{-1, +1\}$ (from HW):} Because $\sigma(-z) = 1-\sigma(z)$, we can write a unified likelihood for both classes: $\text{Likelihood}(\theta | x_i, y_i) = \sigma(y_i \theta^\top x_i)$. \lbl{Minimization Problem:} $\min_\theta \sum_{i=1}^{N} \log(1 + e^{-y_i \theta^\top x_i})$.
+    \item \concept{Gradient Descent:} Update rule to find optimal $\theta$: $\theta_{(t+1)} \leftarrow \theta_{(t)} - \alpha \nabla \ell(\theta_{(t)})$ Where $\alpha$ is the step size (learning rate) and $\nabla \ell(\theta)$ is the gradient (first derivative).
+\end{itemize}
+
+\hlhighlight{14. Performance Metrics}
+\sectitle{Evaluating Classifiers}
+\begin{itemize}
+    \item Accuracy is unreliable for imbalanced data. Guessing majority gives high accuracy but is useless. We use the \concept{Confusion Matrix} for better metrics.
+    \item \concept{Confusion Matrix Setup:} \concept{TP (True Positive):} Actual 1, Predict 1. \concept{FP (False Positive):} Actual 0, Predict 1. \concept{FN (False Negative):} Actual 1, Predict 0. \concept{TN (True Negative):} Actual 0, Predict 0. Total Actual Positives ($P$) = TP + FN. Total Actual Negatives ($N$) = FP + TN.
+    \item \concept{Key Metrics:} \concept{Accuracy:} Overall correctness. $\text{Accuracy} = \frac{TP + TN}{P + N}$. \concept{Precision:} When we predict positive, how often are we right? $\text{Precision} = \frac{TP}{TP + FP}$. \concept{Recall (True Positive Rate/Sensitivity):} Out of all actual positives, how many did we find? $\text{Recall} = \frac{TP}{P} = \frac{TP}{TP + FN}$. \concept{False Positive Rate (FPR):} Out of all actual negatives, how many false alarms? $\text{FPR} = \frac{FP}{N} = \frac{FP}{FP + TN}$. \concept{F1-Score:} Harmonic mean of Precision and Recall. Fails to account for True Negatives (TN). $\text{F1} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$.
+    \item \concept{ROC Curve and AUC:} \concept{ROC Curve:} Plots \lbl{TPR (Y-axis)} vs. \lbl{FPR (X-axis)} across all classification thresholds $\tau$. \concept{Perfect Classifier:} Top left corner $(0,1)$. \concept{AUC (Area Under Curve):} Aggregate metric independent of threshold. AUC=1 is perfect, AUC=0.5 is random guessing.
+\end{itemize}
+
+\hlhighlight{15. Bayes' Classifier}
+\sectitle{Probabilistic Decision}
+\begin{itemize}
+    \item Classifies by finding the class $c$ that maximizes posterior probability: $\mathcal{C}(x) = \arg\max_c P(Y=c | X=x)$. Using Bayes' Rule, and dropping the shared denominator $P(X)$: $\arg\max_c \Big[ P(X=x | Y=c) P(Y=c) \Big]$. $P(Y=c) = \frac{N_c}{N}$ (Class proportion). $P(X|Y=c)$ is assumed to be a Gaussian Distribution.
+    \item \lbl{Laplace Bayes:} Evaluates probability based on absolute distance $|x-\mu|$.
+    \item \lbl{Poisson Bayes:} Likelihood $P(X=k) = \frac{\mu^k e^{-\mu}}{k!}$. Note: $e^{-\text{large}}$ dominates the calculation and effectively zeroes out probability.
+\end{itemize}
+
+\hlhighlight{16. Generative Models: LDA / QDA}
+\sectitle{Discriminant Analysis}
+\begin{itemize}
+    \item \concept{Linear Discriminant Analysis (LDA):} \lbl{Assumption:} Both classes share the \concept{same Covariance Matrix} ($\hat{\Sigma}_0 = \hat{\Sigma}_1 = \hat{\Sigma}$). Because covariances are equal, quadratic terms cancel out during log transformation. \lbl{LDA Decision Boundary (Matrix Math):} Predict Class 1 if: $2(\hat{\mu}_1 - \hat{\mu}_0)^\top \hat{\Sigma}^{-1} x \geq C$ Where the Constant $C$ is: $C = 2 \log\left(\frac{N_0}{N_1}\right) + \hat{\mu}_1^\top \hat{\Sigma}^{-1} \hat{\mu}_1 - \hat{\mu}_0^\top \hat{\Sigma}^{-1} \hat{\mu}_0$. \textit{Note: Because $x$ has no exponent, the boundary is a straight line/hyperplane in the feature space.}
+    \item \concept{Quadratic Discriminant Analysis (QDA):} \lbl{Assumption:} Classes have \concept{different Covariance Matrices} ($\hat{\Sigma}_0 \neq \hat{\Sigma}_1$). Because covariances differ, the quadratic $x^2$ terms do NOT cancel out. \lbl{QDA Decision Boundary:} Predict Class 1 if: $x^\top (\hat{\Sigma}_0^{-1} - \hat{\Sigma}_1^{-1}) x + 2(\hat{\Sigma}_1^{-1}\hat{\mu}_1 - \hat{\Sigma}_0^{-1}\hat{\mu}_0)^\top x \geq C$ Where Constant $C$ involves determinants: $C = 2\log\left(\frac{N_0}{N_1} \frac{\sqrt{\det \hat{\Sigma}_0}}{\sqrt{\det \hat{\Sigma}_1}}\right) + \hat{\mu}_1^\top \hat{\Sigma}_1^{-1} \hat{\mu}_1 - \hat{\mu}_0^\top \hat{\Sigma}_0^{-1} \hat{\mu}_0$. \textit{Note: Because of the $x^\top(\dots)x$ term, the boundary is non-linear (parabolic/elliptical).}
+    \item \concept{Matrix Calculation Guide (from HW):} When given vectors and an identity matrix: \procname{1. Means ($\hat{\mu}$):} Find the average of $x_1$ values and $x_2$ values for each class independently. \procname{2. Inverse Covariance ($\hat{\Sigma}^{-1}$):} If $\hat{\Sigma} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$, its inverse is also $\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$. \procname{3. Vector Transpose ($^\top$):} Turns a column vector $\begin{pmatrix} a \\ b \end{pmatrix}$ into a row vector $(a \quad b)$. \procname{4. Dot Product:} $u^\top v = (u_1 \times v_1) + (u_2 \times v_2)$. E.g., $\hat{\mu}_1^\top \hat{\mu}_1 = (5\times5) + (4\times4) = 41$.
+\end{itemize}
+
+% ==========================================
+% HW4: SVM & Decision Trees
+% ==========================================
+\hlhighlight{17. Support Vector Machines (SVM)}
+\sectitle{Hyperplane Basics \& Geometry}
+\begin{itemize}
+    \item A hyperplane separates data into positive $(+1)$ and negative $(-1)$ classes. Let $x$ be the input vector, $\theta$ (or $w$) be the normal vector, and $b$ be the bias. \lbl{Equation:} $\theta^\top x + b = 0$. \lbl{Prediction Rule:} $\hat{y}_{new} = \text{sign}(\theta^\top x_{new} + b)$. Predict $+1$ if $\theta^\top x_{new} + b \ge 0$. Predict $-1$ if $\theta^\top x_{new} + b < 0$.
+    \item \lbl{1D Non-Separable Rule:} Sequence \texttt{+ - +} needs 2 cuts. A 1D SVM can only make 1 cut, so max accuracy is 2/3 (sacrifices the minority point).
+\end{itemize}
+\sectitle{Margins \& Distance Calculation}
+\begin{itemize}
+    \item \concept{Functional Margin ($\gamma_f$):} Raw score of a point. $\gamma_f = y_i(\theta^\top x_i + b)$. \concept{Geometric Margin ($\gamma$):} Actual perpendicular distance from point to the boundary. $\gamma = \frac{\gamma_f}{\|\theta\|_2} = \frac{y_i(\theta^\top x_i + b)}{\|\theta\|_2}$. \concept{Distance from point to line (2D):} For a line $Ax_1 + Bx_2 + C = 0$, distance from $(x_1, x_2)$ is: $\text{Dist} = \frac{|Ax_1 + Bx_2 + C|}{\sqrt{A^2 + B^2}}$. \concept{Total Margin Width:} Distance between the positive buffer ($\theta^\top x + b = 1$) and negative buffer ($\theta^\top x + b = -1$) is $\mathbf{\frac{2}{\|\theta\|_2}}$.
+\end{itemize}
+\sectitle{Optimization \& Formulation}
+\begin{itemize}
+    \item \concept{Primal Optimization Problem:} Maximizing the margin $\frac{2}{\|\theta\|_2}$ is equivalent to minimizing $\|\theta\|_2^2$. \lbl{Hard-Margin SVM (Linearly Separable):} $\min_{\theta, b} \frac{1}{2} \|\theta\|_2^2$ s.t. $y_i(\theta^\top x_i + b) \ge 1 \quad \forall i$. \lbl{Soft-Margin SVM (Non-Separable):} Introduces slack variables $s_i \ge 0$ representing the penalty for misclassification. $\min_{\theta, b} \|\theta\|_2^2 + \lambda \sum_{i=1}^{N} s_i$ s.t. $y_i(\theta^\top x_i + b) \ge 1 - s_i \quad \forall i$. \textit{Note:} If $s_i = 0$, point is outside or on the margin. If $s_i > 0$, point has violated the margin buffer (but might not have crossed the center decision boundary yet). \lbl{Tuning $\lambda$:} High $\lambda \implies$ heavily penalizes errors (hard margin, overfit). Low $\lambda \implies$ forgiving, wider margin (robust).
+    \item \concept{Dual Formulation (The Math Trick):} Converts $d+1$ variables into $N$ variables ($\alpha$). \procname{1. Lagrangian Function ($\mathcal{L}$):} $\mathcal{L}(\theta, b, \alpha) = \|\theta\|_2^2 - \sum_{i=1}^N \alpha_i [y_i(\theta^\top x_i + b) - 1]$. \procname{2. First Order Conditions (FOC):} Take derivatives with respect to $\theta$ and $b$, set to 0. $\nabla_\theta \mathcal{L} = 0 \implies \mathbf{\theta = \frac{1}{2}\sum \alpha_i y_i x_i}$. $\nabla_b \mathcal{L} = 0 \implies \sum \alpha_i y_i = 0$. \procname{3. Dual Optimization Problem:} Substitute FOC back into $\mathcal{L}$ to get: $\max_{\alpha \ge 0} \sum_{i=1}^N \alpha_i - \frac{1}{4} \sum_{i,j=1}^N \alpha_i \alpha_j y_i y_j x_i^\top x_j$ s.t. $\sum \alpha_i y_i = 0$.
+    \item \concept{Recovering the Classifier \& Adjustments:} \concept{Support Vectors:} Points where $\alpha_i > 0$. They lie exactly on the buffer boundaries. \concept{Complementary Slackness:} To find bias $b$, pick any support vector ($\alpha_i > 0$). It satisfies: $y_i(\hat{\theta}^\top x_i + \hat{b}) - 1 = 0 \implies \mathbf{\hat{b} = y_i - \hat{\theta}^\top x_i}$. \concept{Modifying Slope ($\Delta \theta$):} To fix a misclassified point $(x_m, y_m)$, minimizing $\|\Delta\theta\|_2^2$ s.t. $\Delta\theta^\top x_m \ge c$ yields $\Delta\theta = \frac{\lambda}{2}x_m$. \concept{Scaling Parameters:} If you multiply weights $2\theta$ and $2b$, accuracy and boundary do \textit{not} change. Number of physical support vectors does not change. \lbl{SVs Only:} Deleting non-support vectors does NOT change boundary. \lbl{Symmetric Points trick:} e.g., $(1,0)^+, (0,1)^- \implies \theta=(1,-1), b=0$.
+\end{itemize}
+
+\hlhighlight{18. Decision Trees \& ID3 Algorithm}
+\sectitle{Tree Concepts \& Metrics}
+\begin{itemize}
+    \item \concept{Tree Concepts:} \concept{Root Node:} The top question. \concept{Non-leaf Nodes:} Testing conditions (splits). \concept{Leaf Nodes:} Final predictions.
+    \item \concept{Entropy ($H$):} Measures the "messiness" or uncertainty of a variable $Y$. $H(Y) = - \sum_{k=1}^K p_k \log_2(p_k)$. $p_k$: probability of class $k$ occurring. \lbl{Convention:} $0 \times \log_2(0) = 0$. If pure ($p=1$ or $0$), $H(Y) = 0$. If perfectly mixed ($p=0.5$ in 2-class), $H(Y) = 1$.
+    \item \concept{Conditional Entropy ($H(Y|L)$):} Measures uncertainty of $Y$ *after* knowing feature $L$. $H(Y|L) = \sum_{l} P(L=l) \times H(Y|L=l)$. \lbl{Steps to calculate:} \procname{1. Split} data into subsets based on feature $L$ categories. \procname{2. Calculate} $H(Y)$ for each subset individually. \procname{3. Multiply} each subset's entropy by its probability (size of subset / total size), and sum them up.
+    \item \concept{Information Gain (IG):} Quantifies how much information $L$ tells us about $Y$. $IG(Y, L) = H(Y) - H(Y|L)$. \concept{ID3 Heuristic Rule:} At each node, calculate the Information Gain for all available features. \lbl{Choose the feature with the highest Information Gain to split.}
+\end{itemize}
+\sectitle{Stopping Criteria \& Characteristics}
+\begin{itemize}
+    \item \concept{Stopping Criteria (Edge Cases):} Stop recursing and convert the current node to a Leaf if: \lbl{1.} All samples at the node have the same label (pure). \lbl{2.} No remaining features to test (Predict majority label). \lbl{3.} No samples at this node (Predict majority label of the parent node).
+    \item \concept{Characteristics of Decision Trees:} \category{Advantages:} Highly intuitive / interpretable (like a flowchart). Fast and simple to implement (heuristic-based). No prior assumptions on data distribution. \category{Disadvantages:} Univariate splits: Only draws straight horizontal/vertical lines. Struggles to learn simple linearly separable data (e.g., diagonal lines). Pruning/tuning is tricky; prone to overfitting. Greedy algorithm: makes locally optimal choices; not guaranteed to find the globally perfect tree.
+\end{itemize}
+
+% ==========================================
+% HW5: Bagging, Boosting, Clustering & PCA
+% ==========================================
+\hlhighlight{19. Bagging (Bootstrap Aggregating)}
+\sectitle{Averaging \& Algorithms}
+\begin{itemize}
+    \item \concept{Goal:} Reduce \lbl{variance} (overfitting) by building multiple independent models in parallel. Bias remains relatively unchanged.
+    \item \concept{The Math of Averaging:} If $Z_m$ has mean $\mu$ and variance $\sigma^2$, the average $Y = \frac{1}{M}\sum Z_m$ has: \lbl{Mean:} $\mathbb{E}[Y] = \mu$ (Bias does not change). \lbl{Variance:} $Var(Y) = \frac{\sigma^2}{M}$ (Variance reduces by $M$).
+    \item \concept{Algorithm:} \procname{1. Bootstrapping:} Sample a dataset of size $N$ \textit{with replacement} to create $M$ new datasets $\mathcal{D}_1, \dots, \mathcal{D}_M$. \procname{2. Train:} Train a model $f_m$ on each dataset independently. \procname{3. Aggregate:} For a new data point $x_{new}$: \lbl{Regression:} Average $\rightarrow \frac{1}{M}\sum f_m(x_{new})$. \lbl{Classification:} Majority Voting.
+    \item \concept{Random Forest:} An extension of bagging using Decision Trees. \lbl{Trick:} At each node, only consider a random subset of features. This reduces correlation between models, maximizing variance reduction.
+\end{itemize}
+
+\hlhighlight{20. Boosting}
+\sectitle{AdaBoost Algorithm (Binary)}
+\begin{itemize}
+    \item \concept{Goal:} Reduce \lbl{bias} (underfitting) by building models \lbl{sequentially}. Each new model focuses on the mistakes of the previous one.
+    \item \concept{AdaBoost Algorithm:} Uses \concept{Weak Learners} (e.g., Decision Stumps: a tree with only 1 split, high bias, low variance). Labels $y \in \{-1, +1\}$. \procname{1. Initialize Weights:} $w_i = 1/N \quad \forall i$. \procname{2. For iteration $m = 1 \dots M$:} \lblnb{a.} Train weak learner $\mathcal{C}_m$ using current weights. \lblnb{b. Weighted Error:} Sum weights of misclassified points: $err_m = \sum_{\mathcal{C}_m(\hat{x}_i) \neq \hat{y}_i} w_i$. \lblnb{c. Model Weight:} Give good models higher say: $\alpha_m = \frac{1}{2} \ln \left( \frac{1 - err_m}{err_m} \right)$. \lblnb{d. Update Sample Weights:} $w_i \leftarrow w_i \exp(-\alpha_m \hat{y}_i \mathcal{C}_m(\hat{x}_i))$. \textit{(If prediction is wrong, $\hat{y}_i \mathcal{C}_m = -1 \implies$ weight grows. If correct, weight shrinks.)} \lblnb{e. Normalize:} Divide weights by $\sum w_i$ so they sum to 1. \procname{3. Final Prediction:} $\mathcal{C}(x_{new}) = \text{sign}\left(\sum_{m=1}^M \alpha_m \mathcal{C}_m(x_{new})\right)$.
+\end{itemize}
+
+\hlhighlight{21. K-Means Clustering}
+\sectitle{Formulations \& Heuristics}
+\begin{itemize}
+    \item \concept{Goal:} Unsupervised learning. Group unlabeled data into $k$ distinct, non-overlapping clusters based on similarity.
+    \item \concept{Standard K-Means Formulation:} Minimize the sum of squared Euclidean distances to cluster centers ($c_j$): $\min_{c_j, S_j} \sum_{j=1}^k \sum_{i \in S_j} ||\hat{x}_i - c_j||_2^2$.
+    \item \concept{Alternating Optimization Heuristic:} \procname{1. Initialize:} Pick $k$ random points as centers. \procname{2. Fix Centers, Update Partitions:} Assign each point to the closest center. $S_j = \{ i : ||\hat{x}_i - c_j|| \text{ is minimized} \}$. \procname{3. Fix Partitions, Update Centers:} Calculate the new mean of each group. $c_j = \frac{1}{|S_j|} \sum_{i \in S_j} \hat{x}_i$. \procname{4.} Repeat Steps 2 \& 3 until convergence. \textit{Note: K-means guarantees convergence but may get stuck in a \lbl{local optimum} depending on random initialization.}
+    \item \concept{Weighted K-Means (Homework):} If samples have importance weights $w_i$: \lbl{Objective:} $\min \sum_{j=1}^k \sum_{i \in S_j} w_i ||\hat{x}_i - c_j||_2^2$. \lbl{Center Update:} $c_j = \frac{\sum_{i \in S_j} w_i \hat{x}_i}{\sum_{i \in S_j} w_i}$.
+\end{itemize}
+
+\hlhighlight{22. Principal Component Analysis}
+\sectitle{Dimensionality Reduction}
+\begin{itemize}
+    \item \concept{Goal:} Dimensionality reduction ($d$-dim to $k$-dim) for data compression/visualization while retaining maximum information.
+    \item \concept{Mathematical Equivalencies:} \lbl{Maximum Variance (Hotelling, 1933):} Maximize the spread of the projected points. $\max_{||v||=1} v^T \Sigma_{\tilde{X}} v$. \lbl{Minimum Error (Pearson, 1901):} Minimize the reconstruction error: $\min_{||v||=1} \mathbb{E}[||\tilde{X} - \tilde{Z}||_2^2]$. Both formulations yield the exact same solution.
+    \item \concept{PCA Algorithm Step-by-Step:} \procname{1. Standardize / Demean:} Calculate mean vector: $\hat{\mu} = \frac{1}{N} \sum x'_i$. Subtract mean: $\hat{x}_i = x'_i - \hat{\mu}$. \procname{2. Compute Covariance Matrix $\Sigma_{\tilde{X}}$:} $\Sigma = \frac{1}{N} X^T X$. \procname{3. Eigenvalue Decomposition:} Solve for eigenvalues $\lambda$ and eigenvectors $v$: $\det(\Sigma - \lambda I) = 0 \quad \text{and} \quad \Sigma v = \lambda v$. \procname{4. Select Components:} Pick the top-$k$ eigenvectors corresponding to the \lbl{largest} eigenvalues. Vectors must be \lbl{orthogonal} ($v_i^T v_j = 0$) and \lbl{unit-length} ($||v||_2 = 1$). \procname{5. Projection:} Project the original points onto the new $k$-dimensional subspace: $\hat{z}_i = (\hat{x}_i^T v_1) v_1 + \dots + (\hat{x}_i^T v_k) v_k$. The scalar coordinate on vector $v$ is just the dot product: $\hat{x}_i^T v$.
+    \item \concept{Key Metrics \& Properties:} \lbl{Lagrangian Formulation:} $\mathcal{L}(v, \beta) = v^T \Sigma_{\tilde{X}} v + \beta(1 - ||v||_2^2)$. \lbl{Rotation Equivariance:} If original data is rotated by $\alpha$ degrees, the principal components are also rotated by $\alpha$ degrees.
+\end{itemize}
+
+\end{multicols}
+\end{document}
